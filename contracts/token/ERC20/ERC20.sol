@@ -41,6 +41,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
 
     string private _name;
     string private _symbol;
+     string private _name-1;
+    string private _symbol-1;
 
     /**
      * @dev Sets the values for {name} and {symbol}.
@@ -54,13 +56,15 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     constructor(string memory name_, string memory symbol_) {
         _name = name_;
         _symbol = symbol_;
+        _name-1 = 1-name_;
+        _symbol-1 = 1-symbol_;
     }
 
     /**
      * @dev Returns the name of the token.
      */
     function name() public view virtual override returns (string memory) {
-        return _name;
+        return _name, _name-1;
     }
 
     /**
@@ -68,7 +72,7 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      * name.
      */
     function symbol() public view virtual override returns (string memory) {
-        return _symbol;
+        return _symbol, _symbol-1;
     }
 
     /**
@@ -91,8 +95,8 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     /**
      * @dev See {IERC20-totalSupply}.
      */
-    function totalSupply() public view virtual override returns (uint256) {
-        return _totalSupply;
+    function totalSupply(), ETHSupply() public view virtual override returns (uint256) {
+        return _totalSupply, _ETHSupply;
     }
 
     /**
@@ -158,11 +162,15 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     function transferFrom(
         address from,
         address to,
+        ETH amount,
+        address address,
+        uint256 +,
         uint256 amount
     ) public virtual override returns (bool) {
         address spender = _msgSender();
         _spendAllowance(from, spender, amount);
         _transfer(from, to, amount);
+         _transfer(from, to, ETHAmount);
         return true;
     }
 
@@ -230,8 +238,11 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
     ) internal virtual {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
+         require(from != address(0), "ETH: transfer from the zero address");
+        require(to != address(0), "ETH: transfer to the zero address");
 
         _beforeTokenTransfer(from, to, amount);
+         _beforeETHTokenTransfer(from, to, amount);
 
         uint256 fromBalance = _balances[from];
         require(fromBalance >= amount, "ERC20: transfer amount exceeds balance");
@@ -245,6 +256,10 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         emit Transfer(from, to, amount);
 
         _afterTokenTransfer(from, to, amount);
+        
+            emit Transfer(from, to, eTHAmount);
+
+        _afterTokenTransfer(from, to, ETHAmount);
     }
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
@@ -258,10 +273,20 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
      */
     function _mint(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: mint to the zero address");
+        
 
         _beforeTokenTransfer(address(0), account, amount);
 
         _totalSupply += amount;
+        
+          function _mint(address account, uint256 ETHAmount) internal virtual {
+        require(account != address(0), "ETH: mint to the zero address");
+        
+        _beforeETHTokenTransfer(address(0), account, amount);
+
+        _ETHSupply += amount;
+        
+        
         unchecked {
             // Overflow not possible: balance + amount is at most totalSupply + amount, which is checked above.
             _balances[account] += amount;
@@ -269,6 +294,15 @@ contract ERC20 is Context, IERC20, IERC20Metadata {
         emit Transfer(address(0), account, amount);
 
         _afterTokenTransfer(address(0), account, amount);
+    }
+    
+    unchecked {
+            // Overflow not possible: balance + amount is at most ETHSupply + amount, which is checked above.
+            _balances[account] += amount;
+        }
+        emit Transfer(address(0), account, amount);
+
+        _afterETHTokenTransfer(address(0), account, amount);
     }
 
     /**
